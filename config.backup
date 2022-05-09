@@ -1,0 +1,12 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = true
+	symlinks = false
+	ignorecase = true
+	sharedrepository = 2
+[receive]
+	denyNonFastforwards = true
+[remote "Work1"]
+	url = C:/Users/Dima-Sit168/Documents/SQL Server Management Studio/SQL DateBase/Work1
+	fetch = +refs/heads/*:refs/remotes/Work1/*
