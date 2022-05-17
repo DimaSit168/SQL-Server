@@ -15,12 +15,14 @@ WHERE ProductSubcategoryID = 1;
 
 
 SELECT [Name], ListPrice, 
-(SELECT AVG(ListPrice) FROM Production.Product) AS Average, 
-    ListPrice - (SELECT AVG(ListPrice) FROM Production.Product)
+(SELECT AVG(ListPrice) 
+ FROM Production.Product) AS Average, 
+    ListPrice - (SELECT AVG(ListPrice) 
+	FROM Production.Product)
     AS Difference
 FROM Production.Product
 WHERE ProductSubcategoryID = 1;
-
+	
 
 (SELECT MIN(ListPrice) 
 FROM Production.Product 
@@ -28,10 +30,19 @@ WHERE ListPrice > 0);
 
 
 --2. Показать самый легкий товар (вес определен и больше нуля)(Таблица Production.Product). Показать поля [Name], [Weight].
-SELECT [Name], Weight
+--SELECT [Name], [Weight]
+--FROM Production.Product
+--WHERE [Weight] > 0
+--ORDER BY Weight;
+
+SELECT [Name], [Weight]
 FROM Production.Product
-WHERE Weight > 0
-ORDER BY Weight;
+WHERE [Weight] = 
+	 (
+		SELECT MIN([Weight])
+		FROM Production.Product
+		WHERE [Weight] > 0
+	);
 
 --3. Показать товары, для которых существует более 2 классов, в одном стиле (стиль и класс определен) 
 --(Таблица Production.Product). Показать поля [Name], Style и Class.
@@ -42,14 +53,35 @@ WHERE Style IS NOT NULL
 AND Class IS NOT NULL
 ORDER BY Class;
 
+SELECT *
+FROM Production.Product
+
+SELECT COUNT(DISTINCT p2.Size) AS Size
+	,p2.Style AS Stile
+FROM Production.Product AS p2
+WHERE p2.Style IS NOT NULL
+	AND p2.Size IS NOT NULL
+GROUP BY p2.Style
+HAVING COUNT(DISTINCT p2.Size) > 2;
+
 --4. Показать товары, цена которых равна минимальной (больше нуля) цене товара того же размера (размер определен) 
 --(Таблица Production.Product). Показать поля [Name], ListPrice и Size.
 
-SELECT [Name], ListPrice, Size
-FROM Production.Product
-WHERE ListPrice > 0
-AND Size IS NOT NULL
-ORDER BY ListPrice;
+SELECT p1.[Name]
+	,p1.ListPrice
+	,p1.Size -- добавим столбец размер
+FROM Production.Product AS p1
+WHERE
+	-- p1.Style = 'M' AND удалим фильтрацию для стиля
+	p1.Size IS NOT NULL AND -- и добавляем фильтрацию для стиля на то, что он заполнен
+	p1.ListPrice = (
+		SELECT MIN(p2.ListPrice)
+		FROM Production.Product AS p2
+		WHERE p1.Size = p2.Size --добавим условие
+		-- p2.Style IS NOT NULL удалим условие
+		--GROUP BY p2.Style – удалим группировку
+	)
+ORDER BY p1.Size; --добавлено для удобства анализа
 
 --5. Показать товары, цена которых меньше средней цены в любом цвете (Таблица Production.Product). 
 --Показать поля [Name], ListPrice и Color.
